@@ -2,11 +2,19 @@ var express = require("express");
 var multer = require("multer");
 var fs = require("fs");
 
+var bodyParser = require("body-parser");
 var app = express();
 
-var messageFileName = "message.txt";
+const repo = require("./repository/FileRepository");
+const useme = require("./util/useme");
+const { exit } = require("process");
+
+var jsonParser = bodyParser.json();
+
+var urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.set("view engine", "ejs");
+app.use(express.static(__dirname + "/public"));
 
 app.get("/", (req, res) => {
     res.render("index");
@@ -14,6 +22,36 @@ app.get("/", (req, res) => {
 
 app.get("/upload", (req, res) => {
     res.render("upload");
+});
+
+app.get("/messenger", async (req, res) => {
+    const messages = await repo.getRecords();
+    res.render("messenger", { messages: useme.getMessageUiModels(messages) });
+});
+
+function getAddress(addr) {
+    let arr = addr.split("::");
+    return arr[arr.length - 1];
+}
+
+app.post("/messenger", urlencodedParser, async (req, res) => {
+    const { message } = req.body;
+    if (message) {
+        const clientAddress =
+            req.headers["x-forwarded-for"]?.split(",").shift() ||
+            req.socket?.remoteAddress ||
+            "unknown";
+        const sendDate = Date();
+        const addedRecord = await repo.createNewRecord({
+            address: getAddress(clientAddress),
+            message,
+            sendDate,
+        });
+
+        console.log(`Sent message :
+      ${JSON.stringify(addedRecord, null, 4)}`);
+    }
+    res.redirect("/messenger");
 });
 
 app.get("/send", (req, res) => {

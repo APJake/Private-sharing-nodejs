@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/Messenger.css">
+    <title>Messenger</title>
+</head>
+<body>
+    <div class="screen">
+        <div class="conversation">
+            <% messages.forEach((messageGroup)=> { %>
+            <div class="messages messages--received">
+                <div class="sender-name"><%= messageGroup.address %> </div>
+                <% messageGroup.messages.forEach((message)=> { %>
+                    <div class="message"><%= message %> </div>
+                 <% }); %>
+            </div>
+             <% }); %>
+            <div class="messages messages--sent">
+                <div class="message">Messenger is started!</div>
+                <div class="message">Have fun!!!</div>
+            </div>
+        </div>
+        <div class="text-bar">
+            <form class="text-bar__field" id="form-message" action="/messenger" method="post">
+                <input type="text" name="message" placeholder="Send a message to public..."/>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
